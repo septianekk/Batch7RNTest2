@@ -1,1 +1,2 @@
-Create Data and Update data done 
+Create Update done
+Kamera dan Geolocation done
