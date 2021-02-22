@@ -27,6 +27,7 @@ const Router = () => {
         component={EditUser}
         options={{title: 'Edit User'}}
       />
+      {/* <Stack.Screen name="Geo" component={Geo} options={{title: 'Edit User'}} /> */}
     </Stack.Navigator>
   );
 };

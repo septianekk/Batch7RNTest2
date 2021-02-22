@@ -1,5 +1,12 @@
 import React, {Component} from 'react';
-import {Text, StyleSheet, View, TouchableOpacity, Alert} from 'react-native';
+import {
+  Text,
+  StyleSheet,
+  View,
+  TouchableOpacity,
+  Alert,
+  ScrollView,
+} from 'react-native';
 import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
 import {faPlus} from '@fortawesome/free-solid-svg-icons';
 import FIREBASE from '../../config/FIREBASE';
@@ -63,30 +70,32 @@ export default class UserScreen extends Component {
 
     return (
       <View style={styles.page}>
-        <View style={styles.header}>
-          <Text style={styles.title}>{`${usersKey.length} User`}</Text>
-          <TouchableOpacity
-            style={styles.btnTambah}
-            onPress={() => this.props.navigation.navigate('AddUser')}>
-            <Text style={styles.appButtonText}>Tambah</Text>
-          </TouchableOpacity>
-          <View style={styles.garis} />
-        </View>
+        <ScrollView>
+          <View style={styles.header}>
+            <Text style={styles.title}>{`${usersKey.length} User`}</Text>
+            <TouchableOpacity
+              style={styles.btnTambah}
+              onPress={() => this.props.navigation.navigate('AddUser')}>
+              <Text style={styles.appButtonText}>Tambah</Text>
+            </TouchableOpacity>
+            <View style={styles.garis} />
+          </View>
 
-        <View style={styles.listUser}>
-          {usersKey.length > 0 ? (
-            usersKey.map((key) => (
-              <CardUser
-                key={key}
-                userItem={users[key]}
-                id={key}
-                {...this.props}
-              />
-            ))
-          ) : (
-            <Text>Daftar Kosong</Text>
-          )}
-        </View>
+          <View style={styles.listUser}>
+            {usersKey.length > 0 ? (
+              usersKey.map((key) => (
+                <CardUser
+                  key={key}
+                  userItem={users[key]}
+                  id={key}
+                  {...this.props}
+                />
+              ))
+            ) : (
+              <Text>Daftar Kosong</Text>
+            )}
+          </View>
+        </ScrollView>
       </View>
     );
   }

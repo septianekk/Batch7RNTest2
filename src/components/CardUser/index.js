@@ -1,5 +1,5 @@
 import React from 'react';
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {StyleSheet, Text, TouchableOpacity, View, Image} from 'react-native';
 import {faEdit, faTimes} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
 
@@ -9,16 +9,18 @@ const CardUser = ({id, userItem, navigation, removeData}) => {
       style={styles.container}
       onPress={() => navigation.navigate('DetailUser', {id: id})}>
       <View>
+        <Image source={{uri: userItem.uri}} style={styles.img} />
         <Text style={styles.nama}>Nama: {userItem.nama}</Text>
         <Text>Gender: {userItem.gender}</Text>
         <Text>Umur: {userItem.umur} tahun</Text>
         <Text>Status: {userItem.status}</Text>
+        <Text>Location: {userItem.location}</Text>
       </View>
       <View style={styles.icon}>
         <FontAwesomeIcon
           icon={faEdit}
           color={'orange'}
-          size={25}
+          size={50}
           onPress={() => navigation.navigate('EditUser', {id: id})}
         />
         {/* <FontAwesomeIcon
@@ -64,5 +66,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-end',
     alignItems: 'center',
+  },
+  img: {
+    marginRight: 100,
+    marginBottom: 10,
+    width: 100,
+    height: 100,
+    borderRadius: 10,
+    alignSelf: 'center',
   },
 });

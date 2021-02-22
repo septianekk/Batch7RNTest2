@@ -38,6 +38,8 @@ export default class DetailUser extends Component {
         <Text style={styles.text}>{user.umur} Tahun </Text>
         <Text>Status : </Text>
         <Text style={styles.text}>{user.status} </Text>
+        <Text>Location : </Text>
+        <Text style={styles.text}>{user.location} </Text>
       </View>
     );
   }

@@ -10,12 +10,13 @@ import {
   TextInput,
   ScrollView,
 } from 'react-native';
+import * as ImagePicker from 'react-native-image-picker';
 import {InputData} from '../../components';
 import FIREBASE from '../../config/FIREBASE';
 import {Picker} from '@react-native-picker/picker';
-
-import Geolocation from 'react-native-geolocation-service';
-
+import Geolocation from '@react-native-community/geolocation';
+// import Geolocation from 'react-native-geolocation-service';
+// import Geo from '../Geo';
 // import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 
 export default class AddUser extends Component {
@@ -27,82 +28,72 @@ export default class AddUser extends Component {
       gender: '',
       umur: '',
       status: '',
-      // fileUri: '',
-      // uri: '',
-      // fileImage: '',
-      // lokasi: {lat: null, lng: null},
+      fileUri: '',
+      uri:
+        'https://cdn0.iconfinder.com/data/icons/set-app-incredibles/24/Image-01-512.png',
+
+      location: '',
+      lat: '',
+      lng: '',
     };
   }
-  // findCoordinates = () => {
-  //   navigator.geolocation.getCurrentPosition(
-  //     (position) => {
-  //       const lokasi = JSON.stringify(position);
 
-  //       this.setState({lokasi});
-  //     },
-  //     (error) => Alert.alert(error.message),
-  //     {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000},
-  //   );
-  // };
+  componentDidMount() {
+    if (this.hasLocationPermission) {
+      Geolocation.getCurrentPosition(
+        (info) => {
+          const {coords} = info;
+          console.log(coords.latitude);
+          console.log(coords.longitude);
+          this.setState({location: coords.latitude + ', ' + coords.longitude});
+          // this.setState({ location: response.uri })
+        },
 
-  // componentDidMount() {
-  //   let geoOptions = {
-  //     enableHighAccuracy: false,
-  //     timOut: 2000,
-  //   };
-  //   this.setState({ready: false, error: null});
-  //   navigator.geolocation.getCurrentPosition(
-  //     this.geoSucces,
-  //     this.geoFailure,
-  //     geoOptions,
-  //   );
-  // }
+        (error) => console.log(error),
+        {
+          enableHighAccuracy: false,
+          timeout: 2000,
+          maximumAge: 3600000,
+        },
+      );
+    }
+  }
 
-  // geoSucces = (position) => {
-  //   console.log(position.coords.latitude);
-  //   this.setState({
-  //     ready: true,
-  //     where: {
-  //       lat: position.coords.latitude,
-  //       lg: position.coords.langitude,
-  //     },
-  //   });
-  // };
+  hasLocationPermission = async () => {
+    if (Platform.OS === 'android' && Platform.Version < 23) {
+      return true;
+    }
 
-  // geoFailure = (err) => {
-  //   this.setState({error: err.message});
-  // };
+    const hasPermission = await PermissionsAndroid.check(
+      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+    );
 
-  // componentDidMount() {
-  //   Geolocation.getCurrentPosition(
-  //     (position) => {
-  //       // this.setState({
-  //       //   // lat: position.coords.latitude,
-  //       //   // lng: position.coords.longitude,
-  //       //   const
-  //       // });
-  //       const lokasi = JSON.stringify(position);
-  //       this.setState({lokasi});
-  //       console.log(
-  //         'posiiton',
-  //         position,
-  //         'latitdue',
-  //         this.state.lng,
-  //         this.state.lat,
-  //       );
-  //     },
-  //     (error) => {
-  //       // See error code charts below.
-  //       console.log(error.code, error.message);
-  //     },
-  //     {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
-  //   );
-  // }
+    if (hasPermission) {
+      return true;
+    }
 
-  // locationCurrent = () => {
-  //   console.log(this.state.lokasi);
-  //   this.setState({lokasi: `${this.state.lng}, ${this.state.lat}`});
-  // };
+    const status = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+    );
+
+    if (status === PermissionsAndroid.RESULTS.GRANTED) {
+      return true;
+    }
+
+    if (status === PermissionsAndroid.RESULTS.DENIED) {
+      ToastAndroid.show(
+        'Location permission denied by user.',
+        ToastAndroid.LONG,
+      );
+    } else if (status === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
+      ToastAndroid.show(
+        'Location permission revoked by user.',
+        ToastAndroid.LONG,
+      );
+    }
+
+    return false;
+  };
 
   onSubmit = () => {
     if (
@@ -118,6 +109,8 @@ export default class AddUser extends Component {
         gender: this.state.gender,
         umur: this.state.umur,
         status: this.state.status,
+        location: this.state.location,
+        uri: this.state.uri,
         // fileUri: this.state.fileUri,
         // lokasi: this.state.lokasi,
       };
@@ -136,125 +129,6 @@ export default class AddUser extends Component {
     }
   };
 
-  // onUploadPhotoHandler = () => {
-  //   const optionsImage = {
-  //     mediaType: 'photo',
-  //     includeBase64: true,
-  //     quality: 0.5,
-  //     maxWidth: 200,
-  //     maxHeight: 200,
-  //   };
-  //   launchCamera(optionsImage, (response) => {
-  //     if (response.didCancel) {
-  //       showMessage({
-  //         message: 'cancel',
-  //         type: 'danger',
-  //       });
-  //     } else {
-  //       console.log(response);
-  //       // const source = {uri: response.uri};
-  //       this.setState({fileUri: response.uri});
-  //     }
-  //   });
-  // };
-
-  // takePhoto = () => {
-  //   const options = {
-  //     storageOptions: {
-  //       skipBackup: false,
-  //       path: 'images',
-  //     },
-  //   };
-  //   ImagePicker.launchCamera(options, (response) => {
-  //     console.log('ressponse', response);
-  //     if (response.didCancel) {
-  //       console.log('user cancelled image picker');
-  //     } else if (response.err) {
-  //       console.log('Image picker error', response.err);
-  //     } else if (response.customButton) {
-  //       console.log('User tapped custom button', response.customButto);
-  //     } else {
-  //       const source = {uri: response.uri};
-  //       this.setState({fileUri: source});
-  //       console.log(source);
-  //     }
-  //   });
-  // };
-
-  // captureImage = (type) => {
-  //   let options = {
-  //     mediaType: type,
-  //     maxWidth: 300,
-  //     maxHeight: 550,
-  //     quality: 1,
-  //     videoQuality: 'low',
-  //     durationLimit: 30, //Video max duration in seconds
-  //     saveToPhotos: true,
-  //   };
-  //   launchCamera(options, (response) => {
-  //     console.log('Response = ', response);
-
-  //     if (response.didCancel) {
-  //       alert('User cancelled camera picker');
-  //       return;
-  //     } else if (response.errorCode === 'camera_unavailable') {
-  //       alert('Camera not available on device');
-  //       return;
-  //     } else if (response.errorCode === 'permission') {
-  //       alert('Permission not satisfied');
-  //       return;
-  //     } else if (response.errorCode === 'others') {
-  //       alert(response.errorMessage);
-  //       return;
-  //     }
-  //     console.log('base64 -> ', response.base64);
-  //     console.log('uri -> ', response.uri);
-  //     console.log('width -> ', response.width);
-  //     console.log('height -> ', response.height);
-  //     console.log('fileSize -> ', response.fileSize);
-  //     console.log('type -> ', response.type);
-  //     console.log('fileName -> ', response.fileName);
-  //     // const source = {uri: response.uri};
-  //     this.setState({fileUri: {uri: response.uri}});
-  //     // this.setState({uri: response.uri});
-  //     // this.setState({fileImage: response});
-  //   });
-  // };
-
-  // chooseFile = (type) => {
-  //   let options = {
-  //     mediaType: type,
-  //     maxWidth: 300,
-  //     maxHeight: 550,
-  //     quality: 1,
-  //   };
-  //   launchImageLibrary(options, (response) => {
-  //     console.log('Response = ', response);
-
-  //     if (response.didCancel) {
-  //       alert('User cancelled camera picker');
-  //       return;
-  //     } else if (response.errorCode === 'camera_unavailable') {
-  //       alert('Camera not available on device');
-  //       return;
-  //     } else if (response.errorCode === 'permission') {
-  //       alert('Permission not satisfied');
-  //       return;
-  //     } else if (response.errorCode === 'others') {
-  //       alert(response.errorMessage);
-  //       return;
-  //     }
-  //     console.log('base64 -> ', response.base64);
-  //     console.log('uri -> ', response.uri);
-  //     console.log('width -> ', response.width);
-  //     console.log('height -> ', response.height);
-  //     console.log('fileSize -> ', response.fileSize);
-  //     console.log('type -> ', response.type);
-
-  //     this.setState({fileUri: {uri: response.uri}});
-  //   });
-  // };
-
   // pickImageHandler = () => {
   //   ImagePicker.showImagePicker(
   //     {title: 'Pick an Image', maxWidth: 800, maxHeight: 600},
@@ -269,6 +143,62 @@ export default class AddUser extends Component {
   //     },
   //   );
   // };
+
+  requestPermission = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.requestMultiple([
+          PermissionsAndroid.PERMISSIONS.CAMERA,
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
+          PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        ]);
+        // If Permission is granted
+        return granted === PermissionsAndroid.RESULTS.GRANTED;
+      } catch (err) {
+        console.warn(err);
+        alert('Write permission err', err);
+      }
+      return false;
+    } else {
+      return true;
+    }
+  };
+
+  requestCameraPermission = async () => {
+    try {
+      const granted = await PermissionsAndroid.requestMultiple([
+        PermissionsAndroid.PERMISSIONS.PERMISSIONS_CAMERA,
+        PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+      ]);
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        console.log('Camera permission given');
+        this.captureCamera();
+      } else {
+        console.log('Camera permission denied');
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+  };
+
+  captureCamera = () => {
+    ImagePicker.launchCamera(
+      {
+        mediaType: 'photo',
+        includeBase64: false,
+        maxHeight: 200,
+        maxWidth: 200,
+      },
+      (response) => {
+        console.log('data urinya ' + response);
+        this.setState({uri: response.uri});
+        this.setState({fileUri: response});
+      },
+    );
+  };
 
   render() {
     return (
@@ -328,33 +258,40 @@ export default class AddUser extends Component {
           </View> */}
 
           {/* <View>
-            {!this.state.ready && (
-              <Text style={styles.big}>Using Geolocation in React Native.</Text>
-            )}
-            {this.state.error && (
-              <Text style={styles.big}>Error: {this.state.error}</Text>
-            )}
-            {this.state.ready && (
-              <Text style={styles.big}>
-                Latitude: {this.state.where.lat}
-                Longitude: {this.state.where.lng}
-              </Text>
-            )} */}
+         
           {/* <Text style={styles.label}>
               Latitude:{this.state.where.lat} Longitude:{this.state.where.lng}{' '}
             </Text> */}
-          {/* <TextInput
-              onChangeText={(value) => this.setState({lokasi: value})}
-              value={this.state.lokasi}
+          <View>
+            <Text style={{marginBottom: 5}}>Lokasi</Text>
+            <TextInput
+              onChangeText={(value) => this.setState({location: value})}
+              value={this.state.location}
               style={styles.input}
               placeholder="Lokasi"
             />
-            <TouchableOpacity
-              onPress={this.findCoordinates}
+            {/* <TouchableOpacity
+              onPress={() => this.locationCurrent()}
               style={styles.tombolGeo}>
               <Text style={styles.textGeo}>Dapatkan Lokasi</Text>
             </TouchableOpacity> */}
-          {/* </View> */}
+            {/* <Geo /> */}
+          </View>
+          <View style={styles.image}>
+            <Image
+              style={styles.cameraContainer}
+              source={{uri: this.state.uri}}
+            />
+          </View>
+          <Button
+            title="Take image"
+            onPress={() => {
+              if (this.requestPermission()) {
+                this.captureCamera();
+              }
+            }}
+            style={styles.Button}
+          />
 
           <TouchableOpacity
             style={styles.tombol}
@@ -367,13 +304,46 @@ export default class AddUser extends Component {
   }
 }
 
+hasLocationPermission = async () => {
+  if (Platform.OS === 'android' && Platform.Version < 23) {
+    return true;
+  }
+
+  const hasPermission = await PermissionsAndroid.check(
+    PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+  );
+
+  if (hasPermission) {
+    return true;
+  }
+
+  const status = await PermissionsAndroid.request(
+    PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+  );
+
+  if (status === PermissionsAndroid.RESULTS.GRANTED) {
+    return true;
+  }
+
+  if (status === PermissionsAndroid.RESULTS.DENIED) {
+    ToastAndroid.show('Location permission denied by user.', ToastAndroid.LONG);
+  } else if (status === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
+    ToastAndroid.show(
+      'Location permission revoked by user.',
+      ToastAndroid.LONG,
+    );
+  }
+
+  return false;
+};
+
 const styles = StyleSheet.create({
   pages: {
     flex: 1,
     padding: 30,
   },
   tombol: {
-    backgroundColor: 'black',
+    backgroundColor: '#009688',
     padding: 10,
     borderRadius: 5,
     marginTop: 10,
@@ -423,5 +393,19 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     alignSelf: 'center',
     textTransform: 'uppercase',
+  },
+  cameraContainer: {
+    paddingVertical: 17,
+    paddingHorizontal: 16,
+    borderTopLeftRadius: 1,
+    borderTopRightRadius: 1,
+    flexDirection: 'column',
+    alignSelf: 'center',
+    justifyContent: 'center',
+    width: 200,
+    height: 200,
+  },
+  image: {
+    marginBottom: 10,
   },
 });
